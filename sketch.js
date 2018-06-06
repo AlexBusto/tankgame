@@ -1,11 +1,12 @@
 var tank, tankani;
 var turret, turretani;
-var bullet, bulletimg, bulletx, bullety, bulletexist;
+//var bullet, bulletimg, bulletx, bullety, bulletexist;
+var bullets, bulletimg, bulletx, bullety, bulletHitCounter; ////
 var tankx, tanky, tankSpeed = 1;
 
 var tank2, tank2ani;
 var turret2, turret2ani;
-var bullet2, bullet2img, bullet2x, bullet2y;
+var bullet2, bullet2img, bullet2x, bullet2y, bullet2exist;
 var tank2x, tank2y, tank2Speed = 1;
 
 var shoot = 0, checkshot = 0, checktime;
@@ -31,6 +32,7 @@ function preload(){
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight - 4);
   angleMode(DEGREES);
+  bullets = new Group();
   //////////////////////tanks///////////////////////
   tank = createSprite(tankx, tanky);
   tankani.frameDelay = 6;
@@ -89,6 +91,12 @@ function setup() {
   wallLeft.immovable = true;
   wallLeftOne.immovable = true;
   wallLeftTwo.immovable = true;
+  wallRight.immovable = true;
+  wallRightOne.immovable = true;
+  wallRightTwo.immovable = true;
+  wallMid.immovable = true;
+  wallTop.immovable = true;
+  wallBottom.immovable = true;
   //--------------------------walls and wall group/------------------------//
 }
 
@@ -105,14 +113,21 @@ function draw() {
   tank2.collide(tank);
   moveTurret();
   moveTurret2();
-  bulletx = tank.position.x + turret.height/2 * sin(turret.rotation);
-  bullety = tank.position.y - turret.height/2 * cos(turret.rotation);
-  bullet2x = tank2.position.x + turret2.height/2 * sin(turret2.rotation);
-  bullet2y = tank2.position.y - turret2.height/2 * cos(turret2.rotation);
+  bulletx = tank.position.x + ((turret.height/2) + 21) * sin(turret.rotation);
+  bullety = tank.position.y - ((turret.height/2) + 21) * cos(turret.rotation);
+  bullet2x = tank2.position.x + ((turret.height/2) + 21) * sin(turret2.rotation);
+  bullet2y = tank2.position.y - ((turret.height/2) + 21) * cos(turret2.rotation);
   checkShoot();
   checkShoot2();
-  if(bulletexist == 1){
-    bullet.bounce(walls);
+  for(var i = 0; i < bullets.length; i++){
+    bullets [i].bounce(walls, bulletHitCount(i));
+    bullets [i].bounce(tank);
+    bullets [i].bounce(tank2);
+  }
+  if(bullet2exist == 1){
+    bullet2.bounce(walls);
+    bullet2.bounce(tank);
+    bullet2.bounce(tank2);
   }
   addShot();
   addShot2();
@@ -149,20 +164,22 @@ function draw() {
   //------------------debug/----------------------/
 }
 
+//rotate the turret upon pressing F or G
 function moveTurret(){
-  if(keyDown(71)){
+  if(keyDown(71)){ //G
     turret.rotation += 1;
   }
-  if(keyDown(70)){
+  if(keyDown(70)){ //F
     turret.rotation -= 1;
   }
 }
 
+//rotates the turret upon pressing numpad1 or numpad3
 function moveTurret2(){
-  if(keyDown(99)){
+  if(keyDown(99)){ //3
     turret2.rotation += 1;
   }
-  if(keyDown(97)){
+  if(keyDown(97)){ //1
     turret2.rotation -= 1;
   }
 }
@@ -171,12 +188,12 @@ function moveTank(){
   //also moves turret with tank
   turret.position.x = tank.position.x;
   turret.position.y = tank.position.y;
-  if(keyDown(83)){  //s
+  if(keyDown(83)){  //S
     tank.setSpeed(1, tank.rotation + 90);
   } else {
     tank.setSpeed(0, 0);
   }
-  if(keyDown(87)){ //w
+  if(keyDown(87)){ //W
     tank.setSpeed(1, tank.rotation - 90);
   }
   if(keyDown(68)){  //D
@@ -193,7 +210,7 @@ function moveTank2(){
   //also moves turret with tank
   turret2.position.x = tank2.position.x;
   turret2.position.y = tank2.position.y;
-  if(keyDown(40)){  //s
+  if(keyDown(40)){
     tank2.setSpeed(1, tank2.rotation + 90);
     turret2.setSpeed(1, tank2.rotation + 90);
   } else {
@@ -224,16 +241,21 @@ function checkShoot(){
     turret.addImage(turretimg1);
   }
   if(shoot == 1){
-    bullet = createSprite(bulletx, bullety);
-    if(bulletexist != 1){
-      bulletexist = 1;
-    }
+    var bullet = createSprite(bulletx, bullety);
+    bullets.add(bullet);
     bullet.addImage(bulletimg);
-    bullet.scale = 0.1;
+    bullet.scale = 0.05;
+    bullet.scale = 0.05;
     checkshot += 1;
     bullet.setSpeed(4, turret.rotation - 90);
     bullet.rotation = turret.rotation;
-    bullet.bounce(walls);
+    var bulletCount = 0;
+    if (bullet.bounce(walls)){
+      this.bulletCount ++;
+      if (this.bulletCount >= 2){
+        this.remove();
+      }
+    }
     turret.addImage(turretimg0);
     checktime = millis();
     shoot = 0;
@@ -251,8 +273,11 @@ function checkShoot2(){
   }
   if(shoot2 == 1){
     bullet2 = createSprite(bullet2x, bullet2y);
+    if(bullet2exist != 1){
+      bullet2exist = 1;
+    }
     bullet2.addImage(bulletimg);
-    bullet2.scale = 0.1;
+    bullet2.scale = 0.05;
     checkshot2 += 1;
     bullet2.setSpeed(4, turret2.rotation - 90);
     bullet2.rotation = turret2.rotation;
@@ -287,4 +312,11 @@ function turretHit(){
 function tankHit(){
   turret.setVelocity(0, 0);
   tank.setVelocity(0, 0);
+}
+
+function bulletHitCount(i){
+  bullets [i].bulletHitCounter ++;
+  if(bullets [i].bulletHitCounter > 2){
+    bullets [i].removed = true;
+  }
 }
