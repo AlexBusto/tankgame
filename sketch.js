@@ -427,7 +427,7 @@ function reset(){
 
 
 /////////////////////debug////////////////////////
-/*tank.debug = mouseIsPressed;
+tank.debug = mouseIsPressed;
 tank2.debug = mouseIsPressed;
 turret.debug = mouseIsPressed;
 turret2.debug = mouseIsPressed;
@@ -454,5 +454,5 @@ if (keyDown(45)){
   text("mouse y: " + mouseY, 20, 150);
   text("width: " + width, 20, 175);
   text("height: " + height, 20, 200);
-}*/
+}
 //------------------debug/----------------------/
